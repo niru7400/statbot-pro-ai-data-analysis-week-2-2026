@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>StatBot Pro</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+    color: white;
+}
+
+/* Navbar */
+.navbar {
+    padding: 20px;
+    text-align: center;
+    font-size: 24px;
+    background: #111;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+/* Container */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 40px;
+}
+
+/* Card */
+.card {
+    background: #1c1c1c;
+    padding: 25px;
+    margin: 20px;
+    width: 350px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,255,255,0.1);
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+/* Input */
+input[type="text"], input[type="file"] {
+    width: 90%;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 20px;
+    border: none;
+}
+
+/* Button */
+button {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none;
+    background: cyan;
+    color: black;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #00bcd4;
+}
+
+/* Result */
+.result-box {
+    background: #222;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    width: 60%;
+    animation: fadeIn 1s ease-in;
+}
+
+/* Graph */
+img {
+    margin-top: 20px;
+    max-width: 600px;
+    border-radius: 10px;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="navbar">🚀 StatBot Pro (AI Dashboard)</div>
+
+<div class="container">
+
+    <!-- Upload Card -->
+    <div class="card">
+        <h3>📂 Upload CSV</h3>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" required>
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+
+    <!-- Query Card -->
+    <div class="card">
+        <h3>🤖 Ask AI</h3>
+        <form action="/ask" method="get">
+            <input type="text" name="q" placeholder="Ask something..." required>
+            <button type="submit">Ask</button>
+        </form>
+    </div>
+
+    <!-- Result -->
+    {% if result %}
+    <div class="result-box">
+        <h3>📊 Result</h3>
+        <p>{{ result }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Graph -->
+    {% if image %}
+        <img src="/{{ image }}">
+    {% endif %}
+
+</div>
+
+</body>
+</html>
