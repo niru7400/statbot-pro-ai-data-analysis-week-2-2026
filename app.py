@@ -12,7 +12,7 @@ app = FastAPI()
 # Templates
 templates = Jinja2Templates(directory="templates")
 
-# graph folder serve
+# graph folder
 os.makedirs("graph", exist_ok=True)
 app.mount("/graph", StaticFiles(directory="graph"), name="graph")
 
@@ -29,9 +29,9 @@ def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-# 📂 Upload
+# 📂 Upload CSV
 @app.post("/upload")
-async def upload(file: UploadFile = File(...)):
+async def upload(request: Request, file: UploadFile = File(...)):
     global agent
 
     path = os.path.join(UPLOAD_FOLDER, file.filename)
@@ -41,10 +41,12 @@ async def upload(file: UploadFile = File(...)):
 
     agent = create_agent(path)
 
-    return RedirectResponse(url="/", status_code=303)
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "msg": f"✅ {file.filename} uploaded successfully!"
+    })
 
-
-# 🤖 Ask
+# 🤖 Ask Question
 @app.get("/ask", response_class=HTMLResponse)
 def ask(request: Request, q: str):
     global agent
@@ -56,29 +58,14 @@ def ask(request: Request, q: str):
         })
 
     try:
-        # GRAPH KEYWORDS DETECTION
-        graph_keywords = ["plot", "graph", "chart", "visualize"]
+        result = agent(q)   # 🔥 NEW (no invoke)
 
-        if any(word in q.lower() for word in graph_keywords):
-            prompt = q + " using matplotlib and save plot"
-            is_graph = True
-        else:
-            prompt = q + " give only final short answer in one line. no explanation."
-            is_graph = False
-
-        result = agent.invoke(prompt)
-
-        # CLEAN OUTPUT
-        if isinstance(result, dict):
-            result = result.get("output", str(result))
-
-        #  GRAPH ONLY WHEN NEEDED
         image_path = None
-        if is_graph:
-            files = os.listdir("graph")
-            if files:
-                latest = sorted(files)[-1]
-                image_path = "graph/" + latest
+
+        # 🔥 If result is graph file
+        if isinstance(result, str) and result.startswith("graph/"):
+            image_path = result
+            result = "Graph generated ✅"
 
         return templates.TemplateResponse("index.html", {
             "request": request,

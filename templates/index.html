@@ -45,7 +45,7 @@ body {
 }
 
 /* Input */
-input[type="text"], input[type="file"] {
+input[type="text"] {
     width: 90%;
     padding: 10px;
     margin: 10px;
@@ -85,12 +85,42 @@ img {
     border-radius: 10px;
 }
 
+/* File name */
+.file-name {
+    font-size: 14px;
+    color: lightgreen;
+}
+
+/* Success msg */
+.success-msg {
+    margin-top: 10px;
+    color: #00ffcc;
+    font-weight: bold;
+    animation: fadeIn 0.5s ease-in;
+}
+
 /* Animation */
 @keyframes fadeIn {
     from {opacity: 0;}
     to {opacity: 1;}
 }
 </style>
+
+<script>
+function showFileName(input) {
+    if (input.files.length > 0) {
+        document.getElementById("file-name").innerText = input.files[0].name;
+    } else {
+        document.getElementById("file-name").innerText = "No file selected";
+    }
+}
+
+// auto hide success msg
+setTimeout(() => {
+    const msg = document.querySelector(".success-msg");
+    if (msg) msg.style.display = "none";
+}, 3000);
+</script>
 
 </head>
 
@@ -103,10 +133,27 @@ img {
     <!-- Upload Card -->
     <div class="card">
         <h3>📂 Upload CSV</h3>
+
         <form action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file" name="file" required>
+            
+            <!-- Hidden file input -->
+            <input type="file" name="file" id="file-input" onchange="showFileName(this)" hidden required>
+
+            <!-- Custom button -->
+            <button type="button" onclick="document.getElementById('file-input').click()">
+                Choose File
+            </button>
+
+            <!-- File name -->
+            <p id="file-name" class="file-name">No file selected</p>
+
             <button type="submit">Upload</button>
         </form>
+
+        <!-- Success message -->
+        {% if msg %}
+            <p class="success-msg">{{ msg }}</p>
+        {% endif %}
     </div>
 
     <!-- Query Card -->

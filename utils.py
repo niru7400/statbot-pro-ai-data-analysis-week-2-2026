@@ -5,11 +5,10 @@ import matplotlib.pyplot as plt
 import uuid
 import os
 
-
 def save_plot(title="Graph"):
-    os.makedirs("static", exist_ok=True)
+    os.makedirs("graph", exist_ok=True)
 
-    filename = f"static/{uuid.uuid4().hex}.png"
+    filename = f"graph/{uuid.uuid4().hex}.png"
 
     plt.title(title)
     plt.savefig(filename)

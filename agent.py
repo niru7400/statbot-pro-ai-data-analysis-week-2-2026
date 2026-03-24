@@ -1,4 +1,3 @@
-# FIX matplotlib backend (no GUI)
 import matplotlib
 matplotlib.use("Agg")
 
@@ -7,32 +6,65 @@ import matplotlib.pyplot as plt
 import os
 import uuid
 
-# FORCE SAVE GRAPH IN graph/
-def custom_show(*args, **kwargs):
+def save_plot():
     os.makedirs("graph", exist_ok=True)
     filename = f"graph/{uuid.uuid4().hex}.png"
     plt.savefig(filename)
     plt.close()
-
-# override show()
-plt.show = custom_show
-
-
-# AI Agent
-from langchain_experimental.agents import create_pandas_dataframe_agent
-from langchain_community.llms import Ollama
+    return filename
 
 
 def create_agent(csv_path):
     df = pd.read_csv(csv_path)
 
-    llm = Ollama(model="llama3")
+    def ask_question(q):
+        q_lower = q.lower()
 
-    agent = create_pandas_dataframe_agent(
-        llm,
-        df,
-        verbose=False,
-        allow_dangerous_code=True
-    )
+        try:
+            # 📊 BASIC
+            if "average" in q_lower:
+                return round(df["sales"].mean(), 2)
 
-    return agent
+            elif "total" in q_lower or "sum" in q_lower:
+                return df["sales"].sum()
+
+            elif "max" in q_lower or "highest" in q_lower:
+                return df["sales"].max()
+
+            elif "min" in q_lower or "lowest" in q_lower:
+                return df["sales"].min()
+
+            elif "count" in q_lower:
+                return len(df)
+
+            # 🧠 ADVANCED
+            elif "region" in q_lower and "highest" in q_lower:
+                return df.groupby("region")["sales"].sum().idxmax()
+
+            elif "product" in q_lower and "highest" in q_lower:
+                return df.groupby("product")["sales"].sum().idxmax()
+
+            elif "month" in q_lower and "highest" in q_lower:
+                return df.groupby("month")["sales"].sum().idxmax()
+
+            elif "profit" in q_lower:
+                return df["profit"].sum()
+
+            # 📈 PIE
+            elif "pie" in q_lower:
+                df.groupby("region")["sales"].sum().plot(kind="pie", autopct='%1.1f%%')
+                return save_plot()
+
+            # 📊 BAR
+            elif "plot" in q_lower or "graph" in q_lower or "chart" in q_lower:
+                df.groupby("region")["sales"].sum().plot(kind="bar")
+                return save_plot()
+
+            # 🤖 DEFAULT (अब better)
+            else:
+                return "Try: average, total, highest region, plot sales"
+
+        except Exception as e:
+            return str(e)
+
+    return ask_question
